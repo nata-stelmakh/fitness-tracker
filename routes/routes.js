@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const Workout = require("../models");
+const db = require("../models");
 
-router.post("/api/workout", ({ body }, res) => {
-  Workout.create(body)
+router.post("/api/workouts", ({ body }, res) => {
+  db.workout.create()
     .then(dbWorkout => {
       res.json(dbWorkout);
     })
@@ -11,8 +11,8 @@ router.post("/api/workout", ({ body }, res) => {
     });
 });
 
-router.post("/api/workout/bulk", ({ body }, res) => {
-  Workout.insertMany(body)
+router.get("/api/workouts", (req, res) => {
+  db.workout.find({})
     .then(dbWorkout => {
       res.json(dbWorkout);
     })
@@ -21,9 +21,11 @@ router.post("/api/workout/bulk", ({ body }, res) => {
     });
 });
 
-router.get("/api/workout", (req, res) => {
-  Workout.find()
-    .sort({ date: -1 })
+router.put("/api/workouts/:id", ({ body, params }, res) => {
+  db.workout.findByIdAndUpdate(
+    params.id,
+    { $push: { exercises: body } },
+    { new: true, runValidators: true })
     .then(dbWorkout => {
       res.json(dbWorkout);
     })
@@ -32,4 +34,14 @@ router.get("/api/workout", (req, res) => {
     });
 });
 
+
+router.get("/api/workouts/range", (req, res) => {
+  db.workout.find().limit(7)
+    .then(dbWorkout => {
+      res.json(dbWorkout);
+    })
+    .catch(err => {
+      res.status(400).json(err);
+    });
+});
 module.exports = router;
